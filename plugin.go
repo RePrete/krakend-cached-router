@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/sha1"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -27,7 +26,7 @@ func (r registerer) RegisterHandlers(f func(
 func (r registerer) registerHandlers(ctx context.Context, extra map[string]interface{}, handler http.Handler) (http.Handler, error) {
 	ttlConfig := extra["ttl"]
 	if ttlConfig == nil {
-		ttlConfig = "60"
+		ttlConfig = "60s"
 	}
 	ttl, _ := time.ParseDuration(ttlConfig.(string))
 
@@ -36,44 +35,64 @@ func (r registerer) registerHandlers(ctx context.Context, extra map[string]inter
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-
+	m := NewMarshaller(rdb, ctx)
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		key := fmt.Sprintf("%x", sha1.Sum([]byte(req.URL.String())))
+		content, header, err := readFromCache(m, key)
 
-		content, contentError := rdb.Get(ctx, key+".content").Result()
-		header, headerError := rdb.Get(ctx, key+".header").Result()
-
-		if (contentError == redis.Nil || headerError == redis.Nil) && (contentError != nil || headerError != nil) {
+		if err != nil {
 			c := httptest.NewRecorder()
 			handler.ServeHTTP(c, req)
 
-			for k, v := range c.HeaderMap {
-				w.Header()[k] = v
-			}
-
-			w.WriteHeader(c.Code)
-			content := c.Body.String()
-
-			header, _ := json.Marshal(c.Header())
-			rdb.Set(ctx, key+".content", content, ttl)
-			rdb.Set(ctx, key+".header", header, ttl)
-
-			w.Write([]byte(content))
+			fromRecorderToCache(c, m, key, ttl)
+			fromRecorderToResponse(w, c)
 		} else {
-			var responseHeader http.Header
-			err := json.Unmarshal([]byte(header), &responseHeader)
-			if err != nil {
-				fmt.Println(err)
-				panic("error in header unmarshall")
-			}
-			fmt.Println(responseHeader)
-			for k, v := range responseHeader {
-				w.Header()[k] = v
-			}
-
-			w.Write([]byte(content))
+			fromCacheToResposne(w, header, content)
 		}
 	}), nil
+}
+
+func readFromCache(m *Marshaler, key string) (string, http.Header, error) {
+	var content string
+	var header http.Header
+
+	tmpContent, contentError := m.Get(key+".content", content)
+	if contentError != nil {
+		return "", nil, contentError
+	}
+
+	_, headerError := m.Get(key+".header", &header)
+	if headerError != nil {
+		return "", nil, headerError
+	}
+
+	content = tmpContent.(string)
+	return content, header, nil
+}
+
+func fromCacheToResposne(w http.ResponseWriter, header http.Header, content string) {
+	for k, v := range header {
+		w.Header()[k] = v
+	}
+
+	w.Write([]byte(content))
+}
+
+func fromRecorderToResponse(w http.ResponseWriter, c *httptest.ResponseRecorder) {
+	content := c.Body.String()
+	for k, v := range c.HeaderMap {
+		w.Header()[k] = v
+	}
+
+	w.WriteHeader(c.Code)
+	w.Write([]byte(content))
+}
+
+func fromRecorderToCache(c *httptest.ResponseRecorder, m *Marshaler, key string, ttl time.Duration) {
+	content := c.Body.String()
+	header := c.Header()
+	m.Set(key+".content", content, ttl)
+	m.Set(key+".header", header, ttl)
 }
 
 func init() {
