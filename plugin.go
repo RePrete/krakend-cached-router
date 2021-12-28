@@ -11,7 +11,7 @@ import (
 )
 
 var ctx = context.Background()
-var HandlerRegisterer = registerer("cached-router-plugin")
+var HandlerRegisterer = registerer("cached-router")
 
 type registerer string
 
