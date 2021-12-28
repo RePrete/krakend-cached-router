@@ -10,3 +10,6 @@ build:
 
 tidy:
 	docker run -v "${PWD}:/plugin" golang:$(GO_VERSION) bash -c "cd /plugin && go mod tidy" 
+
+test:
+	docker run -v "${PWD}:/plugin" golang:$(GO_VERSION) bash -c "cd /plugin && go test -v ./..." 

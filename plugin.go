@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -23,6 +25,12 @@ func (r registerer) RegisterHandlers(f func(
 }
 
 func (r registerer) registerHandlers(ctx context.Context, extra map[string]interface{}, handler http.Handler) (http.Handler, error) {
+	ttlConfig := extra["ttl"]
+	if ttlConfig == nil {
+		ttlConfig = "60"
+	}
+	ttl, _ := time.ParseDuration(ttlConfig.(string))
+
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     extra["host"].(string),
 		Password: "", // no password set
@@ -31,12 +39,11 @@ func (r registerer) registerHandlers(ctx context.Context, extra map[string]inter
 
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		key := fmt.Sprintf("%x", sha1.Sum([]byte(req.URL.String())))
-		fmt.Println("key: ", key)
 
-		val, err := rdb.Get(ctx, key).Result()
-		fmt.Println(err)
-		if err == redis.Nil {
-			// TODO add header caching
+		content, contentError := rdb.Get(ctx, key+".content").Result()
+		header, headerError := rdb.Get(ctx, key+".header").Result()
+
+		if (contentError == redis.Nil || headerError == redis.Nil) && (contentError != nil || headerError != nil) {
 			c := httptest.NewRecorder()
 			handler.ServeHTTP(c, req)
 
@@ -46,14 +53,25 @@ func (r registerer) registerHandlers(ctx context.Context, extra map[string]inter
 
 			w.WriteHeader(c.Code)
 			content := c.Body.String()
-			fmt.Println("body: ", content)
-			rdb.Set(ctx, key, content, 0)
+
+			header, _ := json.Marshal(c.Header())
+			rdb.Set(ctx, key+".content", content, ttl)
+			rdb.Set(ctx, key+".header", header, ttl)
 
 			w.Write([]byte(content))
-		} else if err != nil {
-			panic(err)
 		} else {
-			w.Write([]byte(val))
+			var responseHeader http.Header
+			err := json.Unmarshal([]byte(header), &responseHeader)
+			if err != nil {
+				fmt.Println(err)
+				panic("error in header unmarshall")
+			}
+			fmt.Println(responseHeader)
+			for k, v := range responseHeader {
+				w.Header()[k] = v
+			}
+
+			w.Write([]byte(content))
 		}
 	}), nil
 }
