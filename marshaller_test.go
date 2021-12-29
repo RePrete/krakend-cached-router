@@ -8,6 +8,7 @@ import (
 	"github.com/RePrete/cached-router-plugin/mocks"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang/mock/gomock"
+	"math"
 	"net/http"
 	"reflect"
 	"testing"
@@ -38,6 +39,53 @@ func TestMarshaler_GetWithString(t *testing.T) {
 	}
 	if err != nil {
 		t.Errorf("Unexpected err from m.Get()")
+	}
+}
+
+func TestMarshaler_GetWithErrorFromUnmarshal(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	client := mocks.NewMockCmdable(ctrl)
+	ctx := context.Background()
+	m := NewMarshaller(client, ctx)
+
+	var input http.Header
+	key := `key`
+	value := `{"Content-Type":application/json; charset=utf-8}`
+	status := redis.NewStringResult(value, nil)
+
+	client.
+		EXPECT().
+		Get(ctx, key).
+		Return(status).
+		AnyTimes()
+
+	_, err := m.Get(key, input)
+	if err == nil {
+		t.Errorf("m.Get() = %v, want an error", err)
+	}
+}
+
+func TestMarshaler_GetWithErrorFromGet(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	client := mocks.NewMockCmdable(ctrl)
+	ctx := context.Background()
+	m := NewMarshaller(client, ctx)
+
+	var input string
+	key := `key`
+	status := redis.NewStringResult(``, errors.New(`an error`))
+
+	client.
+		EXPECT().
+		Get(ctx, key).
+		Return(status).
+		AnyTimes()
+
+	_, err := m.Get(key, input)
+	if err == nil {
+		t.Errorf("m.Get() = %v, want an error", err)
 	}
 }
 
@@ -151,6 +199,30 @@ func TestMarshaler_SetWithErrorFromSet(t *testing.T) {
 	result := m.Set(key, input, duration)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("m.Set() = %v, want %v", result, expected)
+	}
+}
+
+func TestMarshaler_SetWithErrorFromMarshal(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	client := mocks.NewMockCmdable(ctrl)
+	ctx := context.Background()
+	m := NewMarshaller(client, ctx)
+
+	input := math.Inf(1)
+	key := `key`
+	duration, _ := time.ParseDuration(`60s`)
+	status := &redis.StatusCmd{}
+
+	client.
+		EXPECT().
+		Set(ctx, key, input, duration).
+		Return(status).
+		AnyTimes()
+
+	result := m.Set(key, input, duration)
+	if result == nil {
+		t.Errorf("m.Set() = %v, want an error", result)
 	}
 }
 

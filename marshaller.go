@@ -50,7 +50,7 @@ func (c *Marshaler) Set(key string, object interface{}, expiration time.Duration
 	default:
 		value, err = json.Marshal(object)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 
