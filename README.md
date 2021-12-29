@@ -9,8 +9,9 @@ Out of the box KrakenD already has a caching mechanism,with some limitations:
 Also the kind of caching provided is only in-memory.
 
 The goal of this plugin is to provide a more complex caching strategy:
- - [ ] http-handler caching
- - [ ] caching on redis store
+ - [x] http-handler caching
+ - [x] caching on redis store
+ - [ ] some tests
  - [ ] caching on memcache store
 ---
 ## How to?
