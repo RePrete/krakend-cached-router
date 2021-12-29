@@ -1,4 +1,4 @@
-.PHONY: init build tidy
+.PHONY: init build tidy test bash
 GO_VERSION := 1.16.4
 PLUGIN_NAME := cached-router
 
