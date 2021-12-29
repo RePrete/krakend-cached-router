@@ -1,4 +1,4 @@
-# krakend-cached-router
+# krakend-cached-router [![codecov](https://codecov.io/gh/RePrete/krakend-cached-router/branch/main/graph/badge.svg?token=FWO60XLTC8)](https://codecov.io/gh/RePrete/krakend-cached-router)
 A simple plugin able to cache request at router level.
 
 ![KrakenD router-proxy](https://www.krakend.io/images/documentation/krakend-plugins.png)
