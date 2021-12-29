@@ -1,4 +1,4 @@
-module github.com/lreimer/hands-on-krakend/cached-router-plugin
+module github.com/reprete/cached-router-plugin
 
 go 1.16
 
