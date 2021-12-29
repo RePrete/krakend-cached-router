@@ -33,7 +33,7 @@ func (c *Marshaler) Get(key string, returnObj interface{}) (interface{}, error) 
 	}
 
 	// Default case, meaning desired return is a not a string
-	unmarshallErr := json.Unmarshal([]byte(result), &returnObj)
+	unmarshallErr := json.Unmarshal([]byte(result), returnObj)
 	if unmarshallErr != nil {
 		return nil, unmarshallErr
 	}

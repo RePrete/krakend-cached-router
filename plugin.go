@@ -24,7 +24,7 @@ func (r registerer) RegisterHandlers(f func(
 }
 
 func (r registerer) registerHandlers(ctx context.Context, extra map[string]interface{}, handler http.Handler) (http.Handler, error) {
-	ttlConfig := extra["ttl"]
+	ttlConfig := extra["cache_ttl"]
 	if ttlConfig == nil {
 		ttlConfig = "60s"
 	}
@@ -62,7 +62,7 @@ func readFromCache(m *Marshaler, key string) (string, http.Header, error) {
 		return "", nil, contentError
 	}
 
-	_, headerError := m.Get(key+".header", header)
+	_, headerError := m.Get(key+".header", &header)
 	if headerError != nil {
 		return "", nil, headerError
 	}

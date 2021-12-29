@@ -111,12 +111,12 @@ func TestMarshaler_GetWithObject(t *testing.T) {
 		Return(status).
 		AnyTimes()
 
-	tmp, err := m.Get(key, expectedObj)
+	tmp, err := m.Get(key, &expectedObj)
 	if err != nil {
 		t.Errorf("m.Get() unexpected err = %v", err)
 	}
-	result := tmp.(map[string]interface{})
-	for k, v := range result {
+	result := tmp.(*http.Header)
+	for k, v := range *result {
 		// Shitty workaround, needs to be improved
 		expected := fmt.Sprintf("[%s]", header.Get(k))
 		if fmt.Sprint(v) != expected {
