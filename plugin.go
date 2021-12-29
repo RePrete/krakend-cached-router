@@ -41,6 +41,7 @@ func (r registerer) registerHandlers(ctx context.Context, extra map[string]inter
 		content, header, err := readFromCache(m, key)
 
 		if err != nil {
+			// TODO create a new recorder that will cache things
 			c := httptest.NewRecorder()
 			handler.ServeHTTP(c, req)
 
