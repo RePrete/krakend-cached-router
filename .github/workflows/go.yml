@@ -22,4 +22,11 @@ jobs:
       run: go build --buildmode=plugin -o ./plugin.so ./
 
     - name: Test
-      run: go test -coverprofile=c.out && go tool cover -html=c.out
+      run: go test -coverprofile=Documentation/c.out && go tool cover -html=Documentation/c.out
+
+    - name: Upload Documentation to Wiki
+        uses: SwiftDocOrg/github-wiki-publish-action@v1
+        with:
+          path: "Documentation"
+        env:
+          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
