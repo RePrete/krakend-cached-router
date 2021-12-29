@@ -62,7 +62,7 @@ func readFromCache(m *Marshaler, key string) (string, http.Header, error) {
 		return "", nil, contentError
 	}
 
-	_, headerError := m.Get(key+".header", &header)
+	_, headerError := m.Get(key+".header", header)
 	if headerError != nil {
 		return "", nil, headerError
 	}

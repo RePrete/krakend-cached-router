@@ -9,12 +9,12 @@ import (
 
 // Marshaler is the struct that marshal and unmarshal client values
 type Marshaler struct {
-	client  *redis.Client
+	client  redis.Cmdable
 	context context.Context
 }
 
 // New creates a new marshaler that marshals/unmarshals client values
-func NewMarshaller(cache *redis.Client, ctx context.Context) *Marshaler {
+func NewMarshaller(cache redis.Cmdable, ctx context.Context) *Marshaler {
 	return &Marshaler{
 		client:  cache,
 		context: ctx,
@@ -33,7 +33,7 @@ func (c *Marshaler) Get(key string, returnObj interface{}) (interface{}, error) 
 	}
 
 	// Default case, meaning desired return is a not a string
-	unmarshallErr := json.Unmarshal([]byte(result), returnObj)
+	unmarshallErr := json.Unmarshal([]byte(result), &returnObj)
 	if unmarshallErr != nil {
 		return nil, unmarshallErr
 	}
