@@ -18,11 +18,9 @@ jobs:
           go-version: 1.16.4
       - name: Build
         run: go build --buildmode=plugin -o ./plugin.so ./
-      - name: Test
-        run: go test -coverprofile=Wiki/c.out && go tool cover -html=Wiki/c.out
-      - name: Upload Documentation to Wiki
-        uses: SwiftDocOrg/github-wiki-publish-action@v1
+      - name: Run coverage
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic
+      - name: actions-goveralls
+        uses: shogo82148/actions-goveralls@v1.5.1
         with:
-          path: "Wiki"
-        env:
-          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          path-to-profile: coverage.txt
