@@ -21,16 +21,3 @@ jobs:
         uses: shogo82148/actions-goveralls@v1.5.1
         with:
           path-to-profile: coverage.txt
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Buld and deploy artifact
-      uses: wangyoucao577/go-release-action@v1.22
-      with:
-        github_token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-        goos: linux
-        goarch: amd64
-        goversion: "https://dl.google.com/go/go1.16.4.linux-amd64.tar.gz"
-        project_path: "./cmd/test-binary"
-        build_flags: --buildmode=plugin
-        extra_files: LICENSE README.md
