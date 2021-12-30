@@ -7,22 +7,19 @@ import (
 	"time"
 )
 
-// Marshaler is the struct that marshal and unmarshal client values
-type Marshaler struct {
+type ClientMarshaler struct {
 	client  redis.Cmdable
 	context context.Context
 }
 
-// New creates a new marshaler that marshals/unmarshals client values
-func NewMarshaller(cache redis.Cmdable, ctx context.Context) *Marshaler {
-	return &Marshaler{
+func NewMarshaller(cache redis.Cmdable, ctx context.Context) *ClientMarshaler {
+	return &ClientMarshaler{
 		client:  cache,
 		context: ctx,
 	}
 }
 
-// Get obtains a value from client and unmarshal value with given object
-func (c *Marshaler) Get(key string, returnObj interface{}) (interface{}, error) {
+func (c *ClientMarshaler) Get(key string, returnObj interface{}) (interface{}, error) {
 	result, err := c.client.Get(c.context, key).Result()
 	if err != nil {
 		return nil, err
@@ -40,7 +37,7 @@ func (c *Marshaler) Get(key string, returnObj interface{}) (interface{}, error) 
 	return returnObj, nil
 }
 
-func (c *Marshaler) Set(key string, object interface{}, expiration time.Duration) error {
+func (c *ClientMarshaler) Set(key string, object interface{}, expiration time.Duration) error {
 	var value interface{}
 	var err error
 
