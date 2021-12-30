@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Build and deploy artifact
-      uses: wangyoucao577/go-release-action@v1.21
+      uses: wangyoucao577/go-release-action@v1.22
       with:
         github_token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
         goos: linux
@@ -15,3 +15,4 @@ jobs:
         goversion: "https://dl.google.com/go/go1.16.4.linux-amd64.tar.gz"
         build_flags: --buildmode=plugin
         extra_files: LICENSE README.md
+        project_path: ".."
