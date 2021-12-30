@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+type ClientMarshalerInterface interface {
+	Get(key string, returnObj interface{}) (interface{}, error)
+	Set(key string, object interface{}, expiration time.Duration) error
+}
+
 type ClientMarshaler struct {
 	client  redis.Cmdable
 	context context.Context

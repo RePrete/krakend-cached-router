@@ -1,4 +1,4 @@
-module github.com/RePrete/cached-router-plugin
+module github.com/RePrete/krakend-cached-router
 
 go 1.16
 

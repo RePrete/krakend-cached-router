@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/RePrete/cached-router-plugin/mocks"
+	"github.com/RePrete/krakend-cached-router/mocks"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang/mock/gomock"
 	"math"

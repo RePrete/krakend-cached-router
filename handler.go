@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/sha1"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -8,18 +11,22 @@ import (
 
 type CachedHandler struct {
 	handler http.Handler
-	client  *ClientMarshaler
+	client  ClientMarshalerInterface
 	ttl     time.Duration
 }
 
 func (h *CachedHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	key := createCacheKey(request)
+	key, keyError := createCacheKey(request)
+	if keyError != nil {
+		// Add log error
+		h.handler.ServeHTTP(writer, request)
+	}
 	err := h.tryServeFromCache(key, writer)
 	if err != nil {
 		recorder := httptest.NewRecorder()
 		h.handler.ServeHTTP(recorder, request)
-		defer h.storeInCache(key, recorder, h.ttl)
 		h.respond(writer, recorder)
+		defer h.storeInCache(key, recorder, h.ttl)
 	}
 }
 
@@ -54,10 +61,17 @@ func (h *CachedHandler) storeInCache(key string, c *httptest.ResponseRecorder, t
 
 func (h *CachedHandler) respond(w http.ResponseWriter, c *httptest.ResponseRecorder) {
 	content := c.Body.String()
-	for k, v := range c.HeaderMap {
+	for k, v := range c.Header() {
 		w.Header()[k] = v
 	}
 
 	w.WriteHeader(c.Code)
 	w.Write([]byte(content))
+}
+
+func createCacheKey(req *http.Request) (string, error) {
+	if req.URL == nil {
+		return ``, errors.New(`url is null`)
+	}
+	return fmt.Sprintf("%x", sha1.Sum([]byte(req.URL.String()))), nil
 }

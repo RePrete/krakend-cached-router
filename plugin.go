@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/sha1"
 	"fmt"
 	"net/http"
 	"time"
@@ -45,10 +44,6 @@ func (r registerer) registerHandlers(ctx context.Context, extra map[string]inter
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		cachedHandler.ServeHTTP(w, req)
 	}), nil
-}
-
-func createCacheKey(req *http.Request) string {
-	return fmt.Sprintf("%x", sha1.Sum([]byte(req.URL.String())))
 }
 
 func init() {
