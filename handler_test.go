@@ -4,16 +4,16 @@ import (
 	"github.com/RePrete/krakend-cached-router/mocks"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang/mock/gomock"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 )
 
-func init() {
-
-}
+const responseContent = `{"key":"value"}"`
 
 func TestCachedHandler_ServeHTTP_NoCacheHit(t *testing.T) {
 	marshaller, handler, responseWriter, cachedHandler, request, ttl := setup(t)
@@ -54,7 +54,7 @@ func TestCachedHandler_ServeHTTP_NoCacheHit(t *testing.T) {
 		EXPECT().
 		Set(
 			gomock.AssignableToTypeOf(``),
-			gomock.AssignableToTypeOf(http.Header{}),
+			http.Header{`Content-Type`: []string{`application/json`}},
 			ttl,
 		)
 
@@ -89,6 +89,7 @@ func setup(t *testing.T) (
 			Host: `https://petstore.swagger.io`,
 			Path: `/v2/store/inventory`,
 		},
+		Body: io.NopCloser(strings.NewReader(responseContent)),
 	}
 	return m, h, w, handler, request, ttl
 }
