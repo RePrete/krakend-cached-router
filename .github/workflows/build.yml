@@ -13,5 +13,4 @@ jobs:
         goos: linux
         goarch: amd64
         goversion: "https://dl.google.com/go/go1.16.4.linux-amd64.tar.gz"
-        build_flags: --buildmode=plugin
         extra_files: LICENSE README.md
