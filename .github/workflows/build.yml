@@ -6,8 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Buld and deploy artifact
-      uses: wangyoucao577/go-release-action@v1.22
+    - name: Build and deploy artifact
+      uses: wangyoucao577/go-release-action@v1.21
       with:
         github_token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
         goos: linux
