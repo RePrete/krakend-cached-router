@@ -1,6 +1,7 @@
 # krakend-cached-router 
 [![Coverage Status](https://coveralls.io/repos/github/RePrete/krakend-cached-router/badge.svg?branch=main)](https://coveralls.io/github/RePrete/krakend-cached-router?branch=main)
 [![CodeFactor](https://www.codefactor.io/repository/github/reprete/krakend-cached-router/badge)](https://www.codefactor.io/repository/github/reprete/krakend-cached-router)
+[![Go Report Card](https://goreportcard.com/badge/github.com/RePrete/krakend-cached-router)](https://goreportcard.com/report/github.com/RePrete/krakend-cached-router)
   
 A simple plugin able to cache request at router level.
 
