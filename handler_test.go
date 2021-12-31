@@ -46,7 +46,7 @@ func TestCachedHandler_ServeHTTP_NoCacheHit(t *testing.T) {
 		EXPECT().
 		Set(
 			gomock.AssignableToTypeOf(``),
-			gomock.AssignableToTypeOf(``),
+			gomock.AssignableToTypeOf(``), // A bit flaky, should test the body is the same
 			ttl,
 		)
 
