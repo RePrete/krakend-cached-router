@@ -6,6 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - name: Build and deploy artifact
       uses: wangyoucao577/go-release-action@v1.22
       with:
